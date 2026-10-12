@@ -1,0 +1,29 @@
+name: Build SwipeSwitcher Fast
+on:
+  push:
+    branches: [fast-swipe-large-icons]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Show Swift version
+        run: swift --version
+      - name: Test gesture logic
+        run: swift test
+      - name: Build app
+        run: |
+          chmod +x build.sh
+          ./build.sh
+      - name: Pack standalone app
+        run: ditto -c -k --sequesterRsrc --keepParent SwipeSwitcher.app SwipeSwitcher-Fast.zip
+      - name: Upload app
+        uses: actions/upload-artifact@v4
+        with:
+          name: SwipeSwitcher-Fast-macOS
+          path: SwipeSwitcher-Fast.zip
+          if-no-files-found: error
