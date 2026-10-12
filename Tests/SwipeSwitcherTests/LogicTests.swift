@@ -43,8 +43,8 @@ private func swipe(_ d: inout SwipeDetector, fingers: Int = 4, toX: Float, toY: 
 
 @Test func detectorCooldownLimitsFastSwipes() {
     var d = SwipeDetector()
-    // Same 70% travel in 0.1 s: cooldown (250 ms) allows only one trigger.
-    #expect(swipe(&d, toX: 1.0, frames: 10, maxSteps: .max) == [1])
+    // Same 70% travel in 0.1 s: short 50ms cooldown allows a second trigger.
+    #expect(swipe(&d, toX: 1.0, frames: 10, maxSteps: .max) == [1, 1])
 }
 
 @Test func detectorSurvivesFingerFlicker() {
