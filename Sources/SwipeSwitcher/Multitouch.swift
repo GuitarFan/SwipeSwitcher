@@ -89,7 +89,7 @@ enum SwipeEvent: Equatable {
 /// methods that change it.
 struct SwipeDetector {
     static let flickerGrace = 0.10 // s a finger may briefly lift/land without cancelling the swipe
-    static let cooldown = 0.25     // s minimum between two triggers
+    static let cooldown = 0.05     // s minimum between two triggers
     static let dominance: Float = 1.25 // horizontal must beat vertical by this ratio
 
     private var last: SIMD2<Float>?
