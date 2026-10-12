@@ -11,7 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let scrollItem = NSMenuItem(title: "Block Scrolling During Gesture (Accessibility)", action: #selector(askScrollPermission), keyEquivalent: "")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        defaults.register(defaults: ["fingers": 4, "threshold": 10, "maxSteps": Int.max])
+        defaults.register(defaults: ["fingers": 4, "threshold": 4, "maxSteps": Int.max])
         applySettings()
 
         statusItem.button?.image = NSImage(systemSymbolName: "hand.draw", accessibilityDescription: "SwipeSwitcher")
@@ -50,7 +50,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             ("3 fingers", 3),
         ])
         addChoices(to: menu, title: "Swipe Distance per Step", key: "threshold", [
-            ("Short (10% of trackpad width)", 10), ("Medium (15%)", 15), ("Long (25%)", 25),
+            ("Ultra (1%)", 1), ("Very fast (2%)", 2), ("Fast (3%)", 3),
+            ("Responsive (4%)", 4), ("Medium-fast (6%)", 6), ("Short (10%)", 10),
+            ("Medium (15%)", 15), ("Long (25%)", 25),
         ])
         addChoices(to: menu, title: "Steps per Gesture", key: "maxSteps", [
             ("1 app", 1), ("Up to 3 apps", 3), ("Unlimited", Int.max),
