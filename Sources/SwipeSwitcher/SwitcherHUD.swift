@@ -7,8 +7,8 @@ import AppKit
 /// the window under the pointer, so while the preview is open they land here (and are dropped)
 /// instead of scrolling the app behind it. No event tap, so no Accessibility permission.
 final class SwitcherHUD {
-    private static let iconSize: CGFloat = 64
-    private static let cellSize: CGFloat = 84
+    private static let iconSize: CGFloat = 128
+    private static let cellSize: CGFloat = 148
 
     // NSPanel = a window that never becomes the "main" window; `.nonactivatingPanel` means showing
     // it doesn't steal focus from the app you're in.
@@ -17,6 +17,7 @@ final class SwitcherHUD {
     private let icons = NSStackView()
     private let name = NSTextField(labelWithString: "")
     private var shown: [NSRunningApplication] = []
+    private var iconViews: [NSImageView] = []
 
     init() {
         panel.level = .popUpMenu
@@ -61,8 +62,10 @@ final class SwitcherHUD {
 
     func show(_ apps: [NSRunningApplication], selected: Int) {
         if apps != shown { rebuild(apps) }
-        for (i, cell) in icons.arrangedSubviews.enumerated() {
-            cell.layer?.backgroundColor = i == selected ? NSColor.white.withAlphaComponent(0.22).cgColor : nil
+        // Draw only a crisp outline around the actual icon view, never the entire cell.
+        for (i, iconView) in iconViews.enumerated() {
+            iconView.layer?.borderColor = NSColor.black.cgColor
+            iconView.layer?.borderWidth = i == selected ? 4 : 0
         }
         name.stringValue = apps[selected].localizedName ?? ""
         if !panel.isVisible {
@@ -79,17 +82,35 @@ final class SwitcherHUD {
 
     private func rebuild(_ apps: [NSRunningApplication]) {
         shown = apps
-        icons.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        icons.arrangedSubviews.forEach {
+            icons.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+        iconViews.removeAll(keepingCapacity: true)
         for app in apps {
             let image = (app.icon?.copy() as? NSImage) ?? NSImage()
             image.size = NSSize(width: Self.iconSize, height: Self.iconSize)
-            let cell = NSImageView(image: image)
-            cell.imageScaling = .scaleNone // icon keeps 64pt, the extra space is the highlight margin
-            cell.wantsLayer = true
-            cell.layer?.cornerRadius = 14
-            cell.widthAnchor.constraint(equalToConstant: Self.cellSize).isActive = true
-            cell.heightAnchor.constraint(equalToConstant: Self.cellSize).isActive = true
+            let iconView = NSImageView(image: image)
+            iconView.imageScaling = .scaleProportionallyUpOrDown
+            iconView.translatesAutoresizingMaskIntoConstraints = false
+            iconView.wantsLayer = true
+            iconView.layer?.cornerRadius = 28
+            iconView.layer?.masksToBounds = false
+
+            // Keep the icon 128pt, with a separate margin outside its 4pt outline.
+            let cell = NSView()
+            cell.translatesAutoresizingMaskIntoConstraints = false
+            cell.addSubview(iconView)
+            NSLayoutConstraint.activate([
+                cell.widthAnchor.constraint(equalToConstant: Self.cellSize),
+                cell.heightAnchor.constraint(equalToConstant: Self.cellSize),
+                iconView.widthAnchor.constraint(equalToConstant: Self.iconSize),
+                iconView.heightAnchor.constraint(equalToConstant: Self.iconSize),
+                iconView.centerXAnchor.constraint(equalTo: cell.centerXAnchor),
+                iconView.centerYAnchor.constraint(equalTo: cell.centerYAnchor),
+            ])
             icons.addArrangedSubview(cell)
+            iconViews.append(iconView)
         }
     }
 }
